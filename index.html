@@ -292,46 +292,13 @@
       pointer-events: none;
     }
 
-    /* mobile: stack vertically, drop the depth effect */
+    /* mobile: same overlapping layout as desktop, just smaller — and
+       without scroll-zoom / lock (those are already gated to ≥820px). */
     @media (max-width: 640px) {
-      .devices {
-        position: static;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 18px;
-        min-height: 0;
-      }
-      .device-laptop {
-        position: relative;
-        max-width: none;
-        transform: none !important;
-        opacity: 1 !important;
-        filter: none !important;
-        transition: none;
-      }
-      .device-phone {
-        position: relative;
-        right: auto;
-        bottom: auto;
-        width: 200px;
-        max-width: 200px;
-        align-self: center;
-        max-height: 0;
-        margin-top: -18px;
-        overflow: hidden;
-        transform: translateY(20px);
-        transition:
-          max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-          margin-top 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-          opacity 0.55s 0.12s ease,
-          transform 0.55s 0.12s ease;
-      }
-      .device-phone.in {
-        max-height: 600px;
-        margin-top: 0;
-        transform: translateY(0);
-      }
+      .devices { min-height: 320px; }
+      .device-phone { width: 160px; }
+      .laptop-term { height: 280px; }
+      .phone-term { height: 320px; }
     }
 
     .term {
