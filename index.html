@@ -1,0 +1,1827 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>easyvibes.dev — your agents. always running. cross device.</title>
+  <meta name="description" content="Your own small cloud VM that hosts Claude Code, Codex, and Gemini. Spawn agents from any device. Pick up from any other. Sessions never sleep." />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0b0b0b" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)" />
+  <meta name="author" content="easyvibes" />
+
+  <!-- Favicon: green status dot -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%2322c55e'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230b0b0b'/%3E%3Ccircle cx='90' cy='90' r='42' fill='%2322c55e'/%3E%3C/svg%3E" />
+
+  <!-- Open Graph / social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://easyvibes.dev/" />
+  <meta property="og:title" content="easyvibes.dev — your agents. always running. cross device." />
+  <meta property="og:description" content="Your own small cloud VM that hosts Claude Code, Codex, and Gemini. Spawn agents from any device. Pick up from any other. Sessions never sleep." />
+  <meta property="og:site_name" content="easyvibes" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="easyvibes.dev — your agents. always running. cross device." />
+  <meta name="twitter:description" content="Your own small cloud VM that hosts Claude Code, Codex, and Gemini. Spawn agents from any device. Pick up from any other. Sessions never sleep." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&family=Geist+Mono:wght@300..500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================
+       TOKENS — themed via [data-theme]
+       ========================================================== */
+    :root[data-theme="dark"] {
+      --bg:        #0b0b0b;
+      --bg-soft:   #111111;
+      --line:      rgba(244, 244, 243, 0.07);
+      --line-2:    rgba(244, 244, 243, 0.14);
+      --fg:        #f4f4f3;
+      --fg-soft:   #b8b6b1;
+      --fg-mid:    #807e79;
+      --fg-dim:    #4a4844;
+      --fg-faint:  #2a2825;
+      --nav-bg:    rgba(11, 11, 11, 0.7);
+      --selection: var(--fg);
+      --selection-fg: #0b0b0b;
+      --cta-glow:  0 0 36px rgba(244, 244, 243, 0.32);
+    }
+    :root[data-theme="light"] {
+      --bg:        #faf9f6;
+      --bg-soft:   #f0eee8;
+      --line:      rgba(11, 11, 11, 0.08);
+      --line-2:    rgba(11, 11, 11, 0.16);
+      --fg:        #0b0b0b;
+      --fg-soft:   #3a3a37;
+      --fg-mid:    #7a7872;
+      --fg-dim:    #b8b6b0;
+      --fg-faint:  #d8d6d0;
+      --nav-bg:    rgba(250, 249, 246, 0.78);
+      --selection: var(--fg);
+      --selection-fg: #faf9f6;
+      --cta-glow:  0 0 28px rgba(11, 11, 11, 0.22);
+    }
+
+    :root {
+      --sans: "Geist", system-ui, -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+      --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+      --col:    640px;
+      --col-w:  920px;
+      --pad-x:  24px;
+      --r-sm:   8px;
+      --r-md:   12px;
+    }
+
+    @media (min-width: 720px) { :root { --pad-x: 40px; } }
+
+    * { box-sizing: border-box; }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      /* The page has no horizontal layout — nothing scrolls sideways by
+         design. Hide horizontal overflow at the root so transforms /
+         positioned children can never produce a horizontal scrollbar. */
+      overflow-x: hidden;
+    }
+    html, body { margin: 0; padding: 0; }
+    body { overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      min-height: 100vh;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    p { margin: 0; }
+    button { font: inherit; }
+
+    .wrap   { max-width: var(--col);   margin: 0 auto; padding: 0 var(--pad-x); width: 100%; }
+    .wrap-w { max-width: var(--col-w); margin: 0 auto; padding: 0 var(--pad-x); width: 100%; }
+
+    /* ==========================================================
+       NAV
+       ========================================================== */
+    .nav {
+      position: relative;
+      z-index: 50;
+      background: var(--nav-bg);
+    }
+    .nav-inner {
+      max-width: var(--col-w); margin: 0 auto;
+      padding: 18px var(--pad-x);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-size: 13px;
+      font-weight: 400; color: var(--fg);
+    }
+    .brand .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.55);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(34, 197, 94, 0.45); }
+      50%      { opacity: 0.55; box-shadow: 0 0 12px rgba(34, 197, 94, 0.75); }
+    }
+
+    .nav-end {
+      display: flex; align-items: center; gap: 18px;
+      font-family: var(--mono); font-size: 12px; color: var(--fg-mid);
+    }
+    .nav-end a:hover { color: var(--fg); }
+
+    .theme-toggle {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--line-2);
+      background: transparent;
+      color: var(--fg-mid);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+    .theme-toggle:hover {
+      color: var(--fg);
+      border-color: var(--fg-soft);
+    }
+    .theme-toggle svg { width: 14px; height: 14px; }
+    /* show sun in dark mode (we'll switch to light), moon in light mode */
+    .theme-toggle .sun  { display: none; }
+    .theme-toggle .moon { display: block; }
+    [data-theme="light"] .theme-toggle .sun  { display: block; }
+    [data-theme="light"] .theme-toggle .moon { display: none; }
+
+    /* ==========================================================
+       HERO
+       ========================================================== */
+    .hero {
+      min-height: 100vh; min-height: 100svh;
+      display: flex; align-items: center;
+      padding: 24px 0 80px;
+    }
+    @media (min-width: 720px) { .hero { padding: 32px 0 100px; } }
+    .hero-inner { width: 100%; }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--fg-mid);
+      margin-bottom: 28px;
+      animation: fade-up 0.8s 0.05s both ease-out;
+    }
+
+    .hero-h {
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: clamp(40px, 7.8vw, 80px);
+      line-height: 1.02;
+      letter-spacing: -0.028em;
+      margin: 0 0 28px;
+      animation: fade-up 0.85s 0.1s both ease-out;
+    }
+    .hero-h .quiet { color: var(--fg-mid); }
+
+    .hero-sub {
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--fg-soft);
+      max-width: 500px;
+      margin-bottom: 36px;
+      animation: fade-up 0.85s 0.2s both ease-out;
+    }
+    @media (min-width: 720px) { .hero-sub { font-size: 18px; } }
+
+    .cta-row {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      animation: fade-up 0.85s 0.3s both ease-out;
+    }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 16px 22px;
+      background: transparent;
+      border: 1px solid var(--line-2);
+      border-radius: 100px;
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--fg-soft);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    @media (max-width: 540px) {
+      .btn-outline { font-size: 13px; padding: 14px 20px; gap: 7px; }
+    }
+    .btn-outline:hover {
+      color: var(--fg);
+      border-color: var(--fg-soft);
+    }
+    .btn-outline .arr { font-size: 0.92em; opacity: 0.8; }
+
+    /* hero devices — laptop center-stage; phone enters in front, laptop steps back */
+    .devices {
+      margin-top: 56px;
+      position: relative;
+      min-height: 440px;
+      animation: fade-up 1s 0.45s both ease-out;
+    }
+
+    .device-laptop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      transform-origin: 20% 50%;
+      transition:
+        transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
+        filter 0.7s ease;
+    }
+    .devices.staged-phone .device-laptop {
+      transform: translateX(-3%) translateY(40px) scale(0.85);
+      filter: blur(3px) brightness(0.7);
+    }
+
+    .device-phone {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 248px;
+      z-index: 3;
+      opacity: 0;
+      transform: translateY(28px) translateX(14px) scale(0.92);
+      transition:
+        opacity 0.55s 0.18s ease,
+        transform 0.78s 0.12s cubic-bezier(0.34, 1.4, 0.64, 1),
+        filter 0.7s ease;
+    }
+    .device-phone.in {
+      opacity: 1;
+      transform: translateY(0) translateX(0) scale(1);
+    }
+    /* swap-back: user is back on laptop. Phone fades out and recedes. */
+    .devices.staged-laptop .device-laptop {
+      z-index: 4;
+    }
+    .devices.staged-laptop .device-phone.in {
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(40px) translateX(12px) scale(0.78);
+      filter: blur(3px);
+      pointer-events: none;
+    }
+
+    /* mobile: stack vertically, drop the depth effect */
+    @media (max-width: 640px) {
+      .devices {
+        position: static;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 18px;
+        min-height: 0;
+      }
+      .device-laptop {
+        position: relative;
+        max-width: none;
+        transform: none !important;
+        opacity: 1 !important;
+        filter: none !important;
+        transition: none;
+      }
+      .device-phone {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        width: 200px;
+        max-width: 200px;
+        align-self: center;
+        max-height: 0;
+        margin-top: -18px;
+        overflow: hidden;
+        transform: translateY(20px);
+        transition:
+          max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-top 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.55s 0.12s ease,
+          transform 0.55s 0.12s ease;
+      }
+      .device-phone.in {
+        max-height: 600px;
+        margin-top: 0;
+        transform: translateY(0);
+      }
+    }
+
+    .term {
+      background: #0b0b0b;
+      border: 1px solid rgba(244, 244, 243, 0.08);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+    }
+    .term-bar {
+      display: flex; align-items: center; gap: 7px;
+      padding: 11px 13px;
+      border-bottom: 1px solid rgba(244, 244, 243, 0.06);
+      flex-shrink: 0;
+    }
+    .term-bar .d { width: 9px; height: 9px; border-radius: 50%; background: #2a2825; }
+    .term-bar .label {
+      margin-left: 8px;
+      font-family: var(--mono); font-size: 11px; color: #807e79;
+    }
+    .term-body {
+      padding: 20px 22px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.85;
+      color: #b8b6b1;
+      flex: 1;
+    }
+    .laptop-term { height: 380px; }
+    .laptop-term .term-body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    /* claude's updates flow top-to-bottom in this scrolling area;
+       user input is pinned to the bottom (real Claude Code layout).
+       pointer-events: none so wheel/touch events bubble up to the page —
+       the terminal is a display, not an interactive scroll surface. */
+    .term-stream {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+      pointer-events: none;
+    }
+    .term-stream::-webkit-scrollbar { display: none; }
+
+    /* pinned input box at the bottom of each terminal — where the user types */
+    .term-input {
+      flex-shrink: 0;
+      padding-top: 10px;
+      margin-top: 8px;
+      border-top: 1px solid rgba(244, 244, 243, 0.06);
+      font-family: var(--mono);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      position: relative;
+    }
+    .term-input .prompt { color: #807e79; line-height: 1; }
+    .term-input .input-text { color: #f4f4f3; white-space: pre-wrap; word-break: break-word; line-height: 1; flex: 1 1 auto; min-width: 0; }
+    /* in centered-flex context the cursor block sits cleanly without
+       the inline vertical-align trick used in scrollback rows */
+    .term-input .cursor { vertical-align: 0; margin-left: 2px; height: 0.95em; }
+
+    /* When the animation finishes, the laptop input shows a blue "/replay"
+       slash-command. Clicking the input row OR pressing Enter triggers a
+       replay. The whole row becomes the click target with a soft hover. */
+    .term-input.done {
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-radius: 6px;
+    }
+    .term-input.done .input-text { cursor: pointer; }
+    .input-text .replay-cmd {
+      color: #6ea8ff;
+      font-family: var(--mono);
+      transition: color 0.2s ease, text-shadow 0.2s ease;
+    }
+    .term-input.done:hover {
+      background: rgba(110, 168, 255, 0.06);
+    }
+    .term-input.done:hover .replay-cmd {
+      color: #9ec4ff;
+      text-shadow: 0 0 12px rgba(110, 168, 255, 0.35);
+    }
+    .term-input.done:hover .cursor {
+      background: #9ec4ff;
+    }
+
+    @media (max-width: 540px) {
+      .laptop-term .term-body { font-size: 12px; padding: 16px 18px; }
+    }
+
+    /* phone variant */
+    .phone-term {
+      border-radius: 26px;
+      position: relative;
+      height: 420px;
+    }
+    .phone-bar {
+      position: relative;
+      padding: 22px 14px 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .phone-bar::before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      background: #2a2825;
+      border-radius: 4px;
+    }
+    .phone-time {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: #807e79;
+      letter-spacing: 0.04em;
+    }
+    .phone-term .term-body {
+      font-size: 11.5px;
+      line-height: 1.7;
+      padding: 14px 16px 22px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    /* phone's chat stream scrolls; the input box stays pinned at the bottom */
+    .phone-term .term-stream {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .phone-term .term-stream::-webkit-scrollbar { display: none; }
+
+    .term-body .row { white-space: pre-wrap; min-height: 1.85em; }
+
+    /* user-prompt blocks — grey background, nicer arrow (❯), like the real Claude Code CLI.
+       Margin handles the breathing room above & below — adjacent rows shouldn't add
+       extra blank lines around it (we removed the appendBlankRow scaffolding). */
+    .term-body .user-prompt {
+      background: rgba(244, 244, 243, 0.05);
+      border-radius: 6px;
+      padding: 7px 11px;
+      margin: 14px 0;
+      min-height: auto;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    /* a small extra beat right before a user prompt makes the visual rhythm
+       feel like a deliberate "next message" rather than just appended */
+    .term-body .row-action + .user-prompt { margin-top: 18px; }
+    /* and a small beat after a prompt before agent activity starts */
+    .term-body .user-prompt + .row-action { margin-top: 6px; }
+    .term-body .user-prompt .prompt-mark {
+      color: #f4f4f3;
+      font-weight: 500;
+    }
+    .term-body .user-prompt .cmd { color: #f4f4f3; }
+
+    /* Action rows: two-column layout — mark in its own fixed column (centered),
+       text + meta in the next flexible column. Wrapping is contained to the text
+       column so continuation auto-aligns under the label, regardless of what
+       symbol is in the mark column. */
+    .term-body .row-action {
+      display: flex;
+      align-items: baseline;
+      column-gap: 6px;
+    }
+    .term-body .row-action > .mark {
+      flex: 0 0 1.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .term-body .row-action > .text-area {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .phone-term .term-body .row { min-height: 1.7em; }
+    /* Each row appended to the phone gets a soft fade-up on insertion. The
+       animation runs once at element-creation time, so live-typing rows still
+       feel snappy after the initial reveal. Designed to land while the phone
+       is still settling into place — content reads as already-there, not
+       "loaded after". */
+    .phone-term .term-stream .row {
+      animation: phone-row-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes phone-row-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .term-body .prompt { color: #807e79; margin-right: 7px; }
+    .term-body .ok     { color: #f4f4f3; margin-right: 8px; }
+    .term-body .arrow  { color: #f4f4f3; margin-right: 7px; }
+    .term-body .cmd    { color: #f4f4f3; }
+    .term-body .dim    { color: #807e79; }
+    .term-body .head   { color: #f4f4f3; font-weight: 500; }
+    /* the work asterisk pulses orange ↔ dark red while the agent is thinking.
+       Tiny translateX nudge corrects the glyph's natural off-center positioning
+       within its bounding box (Geist Mono renders ✳ slightly right of center). */
+    .term-body .work {
+      color: #fb923c;
+      font-size: 1.4em;
+      line-height: 1;
+      transform: translateX(-3px);
+      animation: work-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes work-pulse {
+      0%, 100% { color: #fb923c; }
+      50%      { color: #991b1b; }
+    }
+    .term-body .meta { color: #5f5d58; }
+
+    /* Claude Code header (pixel mascot + info block, like the actual TUI) */
+    .claude-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding-top: 4px;
+      margin-bottom: 16px;
+    }
+    .claude-mascot {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      margin-top: -2px;
+    }
+    .claude-info { line-height: 1.7; }
+    .claude-info > div { white-space: nowrap; }
+    .cursor {
+      display: inline-block; width: 7px; height: 0.95em;
+      background: #f4f4f3;
+      vertical-align: -1px; margin-left: 2px;
+      animation: blink 1.05s step-end infinite;
+    }
+    @keyframes blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ==========================================================
+       STORY — one flowing scene, not separate beats
+       ========================================================== */
+    .story {
+      padding: 40px 0 120px;
+      position: relative;
+    }
+    @media (min-width: 720px) { .story { padding: 56px 0 160px; } }
+
+    .chapter-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-mid);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 0 80px;
+    }
+    .chapter-label::before {
+      content: ""; width: 28px; height: 1px; background: var(--fg-dim);
+    }
+
+    /* the scene flows in one column, with a quiet vertical line on the left
+       connecting each line — implying continuity, not separation */
+    .scene {
+      position: relative;
+      padding-left: 28px;
+    }
+    @media (min-width: 720px) { .scene { padding-left: 36px; } }
+
+    .scene::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.4em;
+      bottom: 0.4em;
+      width: 1px;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--fg-dim) 8%,
+        var(--fg-dim) 92%,
+        transparent 100%
+      );
+    }
+
+    .scene .line {
+      font-family: var(--sans);
+      font-weight: 300;
+      font-size: clamp(28px, 4.8vw, 48px);
+      line-height: 1.22;
+      letter-spacing: -0.024em;
+      color: var(--fg);
+      margin: 0 0 64px;
+      max-width: 26ch;
+    }
+    @media (min-width: 720px) {
+      .scene .line { margin-bottom: 88px; }
+    }
+    .scene .line:last-child { margin-bottom: 0; }
+    .scene .line .quiet { color: var(--fg-mid); }
+    .scene .line strong { font-weight: 500; color: var(--fg); }
+
+    .scene .final {
+      font-weight: 400;
+      color: var(--fg);
+      max-width: 22ch;
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(12px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .reveal-2 { transition-delay: 0.1s; }
+    .reveal-3 { transition-delay: 0.2s; }
+
+    /* Story-line reveal — a deeper IntersectionObserver-driven fade-up.
+       The earlier scroll-driven version had a Chrome quirk where elements
+       below the cover phase rendered at the END state (opacity 1) instead
+       of the start. IntersectionObserver with a tight rootMargin gives a
+       crisp "appears when it's well up the viewport" feel without quirks. */
+    .scene .line {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .scene .line.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================
+       WHAT IT DOES — three points
+       ========================================================== */
+    .what {
+      padding: 100px 0 100px;
+    }
+    .section-head {
+      margin-bottom: 60px;
+      animation: fade-up 0.8s ease-out;
+    }
+    .section-head .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-mid);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .section-head .num::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: var(--fg-dim);
+    }
+    .section-head h2 {
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.1;
+      letter-spacing: -0.022em;
+      max-width: 18ch;
+      margin: 0;
+    }
+
+    .points {
+      margin: 0;
+      padding: 0;
+    }
+    .point {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding: 36px 0;
+      border-top: 1px solid var(--line);
+    }
+    .point:last-of-type { border-bottom: 1px solid var(--line); }
+    @media (min-width: 720px) {
+      .point {
+        grid-template-columns: 160px 1fr;
+        gap: 32px;
+        padding: 44px 0;
+        align-items: start;
+      }
+    }
+    .point .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-mid);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding-top: 6px;
+    }
+    .point h3 {
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 21px;
+      letter-spacing: -0.014em;
+      margin: 0 0 10px;
+      color: var(--fg);
+    }
+    .point p {
+      font-size: 15.5px;
+      line-height: 1.6;
+      color: var(--fg-soft);
+      margin-bottom: 14px;
+      max-width: 520px;
+    }
+    .point p:last-child { margin-bottom: 0; }
+    .point code {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--fg);
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 10px;
+    }
+    .point .agents {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .point .pill {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg);
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 100px;
+      padding: 4px 11px;
+    }
+
+    /* ==========================================================
+       INSTALL CTA
+       ========================================================== */
+    .install { padding: 60px 0 100px; }
+    .install-inner { text-align: center; padding: 60px 0; }
+    .install h2 {
+      font-family: var(--sans); font-weight: 400;
+      font-size: clamp(28px, 4.5vw, 44px);
+      line-height: 1.1; letter-spacing: -0.022em;
+      margin: 0 auto 32px;
+      max-width: 18ch;
+    }
+    .install h2 strong { font-weight: 500; }
+    .install-cmd {
+      display: inline-flex; align-items: center; gap: 14px;
+      padding: 16px 24px;
+      background: var(--fg);
+      border: 1px solid var(--fg);
+      border-radius: 100px;
+      font-family: var(--mono); font-size: 15px;
+      color: var(--bg);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      max-width: calc(100% - 8px);
+    }
+    @media (max-width: 540px) {
+      .install-cmd { font-size: 13px; padding: 14px 20px; gap: 10px; }
+    }
+    .install-cmd:hover { box-shadow: var(--cta-glow); }
+    .install-cmd .prompt { color: var(--bg); opacity: 0.45; }
+    .install-cmd svg {
+      width: 14px; height: 14px;
+      color: var(--bg);
+      opacity: 0.5;
+      transition: opacity 0.18s ease;
+    }
+    .install-cmd:hover svg { opacity: 1; }
+    .install-cmd.copied svg { opacity: 1; }
+
+    /* ==========================================================
+       FOOTER
+       ========================================================== */
+    footer { border-top: 1px solid var(--line); padding: 32px 0 60px; }
+    .foot {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: center; gap: 20px;
+      font-family: var(--mono); font-size: 12px; color: var(--fg-mid);
+    }
+    .foot a:hover { color: var(--fg); }
+    .foot .end { display: flex; gap: 22px; }
+
+    /* ==========================================================
+       A11Y
+       ========================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .cursor { animation: none; opacity: 1; }
+      .reveal { opacity: 1; transform: none; }
+    }
+    ::selection { background: var(--selection); color: var(--selection-fg); }
+
+    @media (max-width: 540px) {
+      .hero { padding: 96px 0 40px; }
+      .what { padding: 64px 0 64px; }
+      .install { padding: 40px 0 64px; }
+    }
+
+    /* ============================================================
+       SCROLL-EXPAND TERMINALS — feature flag block.
+       To revert this feature: delete from this comment to "END SCROLL-EXPAND".
+       Scales the .devices up via scroll-driven CSS animation as the user scrolls
+       past the hero. Mobile + reduced-motion are excluded; ratios are preserved
+       because we use transform: scale (not changing layout dimensions).
+       ============================================================ */
+    @media (min-width: 820px) and (prefers-reduced-motion: no-preference) {
+      @supports (animation-timeline: scroll(root)) {
+        /* Make the hero a tall scroll-region. Devices sticks near the top of the
+           viewport. As the hero text scrolls UP and the devices SLIDE DOWN +
+           grow, the empty space above the devices increases — visually the
+           terminals "drop into focus" away from the hero copy. */
+        /* Hero needs to be tall enough that the sticky .devices remains stuck
+           through the full 75vh of zoom-scroll. The minimum is ≈ animation-end +
+           sticky-top + devices natural height — roughly 133vh on common
+           viewports. We add a small post-snap buffer so the snapped terminal
+           breathes briefly before the story section enters. */
+        .hero {
+          display: block;
+          min-height: 165vh;
+          padding: 60px 0 40px;
+        }
+        .hero-inner { width: 100%; }
+
+        .devices {
+          position: sticky;
+          top: 80px;
+          transform-origin: center top;
+          will-change: transform;
+          animation: terminal-zoom linear both;
+          animation-timeline: scroll(root);
+          /* Animation completes earlier so the snap can fire while the
+             terminal is still visually lower in the viewport, not pinned
+             high near the nav bar. */
+          animation-range: 8vh 58vh;
+        }
+
+        /* Hero copy (everything above the devices) fades out and lifts as
+           the user scrolls into the zoom — by the time the snap lands, the
+           viewport is dominated by the terminals alone. */
+        .eyebrow, .hero-h, .hero-sub, .cta-row {
+          animation: hero-text-fade linear both;
+          animation-timeline: scroll(root);
+          animation-range: 0 55vh;
+          will-change: opacity, transform;
+        }
+        @keyframes hero-text-fade {
+          0%   { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-24px); }
+        }
+
+        /* Linear timing — scroll progress maps 1:1 to visual zoom progress.
+           Aggressive easing curves were making the animation finish in the
+           first 30% of the scroll range, leaving no room for a perceived
+           "snap" moment at the end. With linear timing the user feels the
+           zoom track their scroll, and the final scrolled-past + JS-locked
+           snap-pop creates the arrival moment. */
+        @keyframes terminal-zoom {
+          0%   { transform: translateY(0)    scale(1); }
+          100% { transform: translateY(40px) scale(1.28); }
+        }
+
+        /* The "snap pop" — when the JS lock fires, .devices gets the
+           `.snapped` class, which overshoots the locked size and settles
+           with a bouncy spring curve. Bigger overshoot + longer duration
+           than a typical microinteraction so it reads clearly as a
+           deliberate arrival moment, not a glitch. */
+        .devices.snapped {
+          animation: terminal-snap-pop 520ms cubic-bezier(0.32, 1.6, 0.5, 1) forwards;
+        }
+        @keyframes terminal-snap-pop {
+          0%   { transform: translateY(40px) scale(1.28); }
+          50%  { transform: translateY(46px) scale(1.40); }
+          100% { transform: translateY(40px) scale(1.28); }
+        }
+      }
+    }
+    /* === END SCROLL-EXPAND === */
+  </style>
+</head>
+
+<body>
+
+  <!-- ====================== NAV ====================== -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span class="dot" aria-hidden="true"></span>
+        <span>easyvibes</span>
+      </a>
+      <div class="nav-end">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ====================== HERO ====================== -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="eyebrow">v0.1 — beta</div>
+
+      <h1 class="hero-h">
+        Your agents.<br/>
+        Always running.<br/>
+        <span class="quiet">Cross device.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Your own small cloud VM that hosts Claude Code, Codex, and Gemini.
+        Spawn agents from any device, mobile or desktop. Pick up from any other.
+        Sessions never sleep.
+      </p>
+
+      <div class="cta-row">
+        <button class="install-cmd" type="button" aria-label="Copy install command">
+          <span class="prompt">$</span>
+          <span class="cmd-text">npx easyvibes init</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+        <a class="btn-outline" href="https://github.com/easyvibes/easyvibes" target="_blank" rel="noopener">github <span class="arr">↗</span></a>
+      </div>
+
+      <div class="devices">
+        <div class="device-laptop">
+          <div class="term laptop-term" aria-label="Claude Code on laptop">
+            <div class="term-bar">
+              <span class="d"></span><span class="d"></span><span class="d"></span>
+              <span class="label">~/myapp · claude code</span>
+            </div>
+            <div class="term-body" id="term-laptop">
+              <div class="term-stream" id="laptop-stream">
+                <div class="claude-header">
+                  <svg class="claude-mascot" viewBox="0 0 16 16" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <!-- ear bumps -->
+                    <rect x="3" y="2" width="2" height="2" fill="#dca09e"/>
+                    <rect x="4" y="3" width="1" height="1" fill="#e8b4b1"/>
+                    <rect x="11" y="2" width="2" height="2" fill="#dca09e"/>
+                    <rect x="11" y="3" width="1" height="1" fill="#e8b4b1"/>
+                    <!-- body -->
+                    <rect x="2" y="4" width="12" height="9" fill="#e8b4b1"/>
+                    <rect x="3" y="13" width="10" height="1" fill="#dca09e"/>
+                    <rect x="2" y="4" width="1" height="1" fill="#dca09e"/>
+                    <rect x="13" y="4" width="1" height="1" fill="#dca09e"/>
+                    <!-- shading on bottom -->
+                    <rect x="2" y="12" width="12" height="1" fill="#dca09e"/>
+                    <!-- eyes -->
+                    <rect x="5" y="7" width="2" height="2" fill="#1a1612"/>
+                    <rect x="9" y="7" width="2" height="2" fill="#1a1612"/>
+                    <!-- eye highlights -->
+                    <rect x="6" y="7" width="1" height="1" fill="#fff"/>
+                    <rect x="10" y="7" width="1" height="1" fill="#fff"/>
+                    <!-- cheek blushes -->
+                    <rect x="3" y="9" width="1" height="1" fill="#cf8d8a"/>
+                    <rect x="12" y="9" width="1" height="1" fill="#cf8d8a"/>
+                  </svg>
+                  <div class="claude-info">
+                    <div><span class="head">Claude Code</span> <span class="dim">v2.1.111</span></div>
+                    <div class="dim">Opus 4.7 (1M context) · Claude Max</div>
+                    <div class="dim">~/projects/myapp</div>
+                  </div>
+                </div>
+              </div>
+              <div class="term-input" id="laptop-input" role="button" tabindex="-1" aria-label="Replay animation">
+                <span class="prompt">❯</span>
+                <span class="input-text" id="laptop-input-text"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="device-phone">
+          <div class="term phone-term" aria-label="Re-attach from phone">
+            <div class="phone-bar">
+              <span class="phone-time">9:46</span>
+            </div>
+            <div class="term-body" id="term-phone">
+              <div class="term-stream" id="phone-stream"></div>
+              <div class="term-input" id="phone-input">
+                <span class="prompt">❯</span>
+                <span class="input-text" id="phone-input-text"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== STORY ====================== -->
+  <section class="story">
+    <div class="wrap">
+      <p class="chapter-label reveal">Where the agents should live</p>
+      <div class="scene">
+        <p class="line">We made agents that work alone. <span class="quiet">Then chained them to your laptop.</span></p>
+        <p class="line">Move them to the cloud. <span class="quiet">Persistent. Reachable from anywhere.</span></p>
+        <p class="line">It keeps building while you're gone. <span class="quiet">Pick up where you left off.</span></p>
+        <p class="line"><strong>Cut the cord.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== WHAT IT DOES ====================== -->
+  <section id="what" class="what">
+    <div class="wrap">
+      <header class="section-head">
+        <span class="num">what you get</span>
+        <h2>Three things that matter.</h2>
+      </header>
+
+      <div class="points">
+
+        <div class="point">
+          <div class="tag">persistent</div>
+          <div>
+            <h3>Sessions that never sleep</h3>
+            <p>
+              Every session is persistent — until <em>you</em> kill it. No time limits,
+              no auto-shutoffs, no laptop-must-stay-open caveats. Close the lid, leave the
+              building, switch networks. Your agents keep working.
+            </p>
+            <code><span style="color:var(--fg-mid)">// session live · 4h 12m · auto-reconnect</span></code>
+          </div>
+        </div>
+
+        <div class="point">
+          <div class="tag">portable</div>
+          <div>
+            <h3>Switch devices, mid-thought</h3>
+            <p>
+              Start on your laptop. Open it on your phone. Pick it up on your iPad.
+              Spawn a brand-new session from a train seat — by the time you're home,
+              it's done.
+            </p>
+            <code>$ claude-vm join refactor-auth</code>
+          </div>
+        </div>
+
+        <div class="point">
+          <div class="tag">familiar</div>
+          <div>
+            <h3>The CLIs you already use</h3>
+            <p>
+              Use whichever agent you want — Claude Code, Codex, Gemini, or all three.
+              Same flags, same prompts, same TUI you know. easyvibes only changes
+              <em>where</em> they run — never <em>how</em> they feel.
+            </p>
+            <span class="agents">
+              <span class="pill">claude code</span>
+              <span class="pill">codex</span>
+              <span class="pill">gemini</span>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== INSTALL ====================== -->
+  <section class="install">
+    <div class="wrap">
+      <div class="install-inner">
+        <h2>Get running in <strong>minutes.</strong></h2>
+
+        <button class="install-cmd" type="button" aria-label="Copy install command">
+          <span class="prompt">$</span>
+          <span class="cmd-text">npx easyvibes init</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== FOOTER ====================== -->
+  <footer>
+    <div class="wrap-w">
+      <div class="foot">
+        <span>easyvibes.dev · coding as it should be</span>
+        <div class="end">
+          <a href="https://github.com/easyvibes/easyvibes" target="_blank" rel="noopener">github</a>
+          <a href="mailto:hi@easyvibes.dev">hi@easyvibes.dev</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ---------- Theme toggle ---------- */
+    (function () {
+      const root = document.documentElement;
+      const stored = localStorage.getItem("evt-theme");
+      const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+      const initial = stored || (prefersLight ? "light" : "dark");
+      root.setAttribute("data-theme", initial);
+
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const cur = root.getAttribute("data-theme");
+        const next = cur === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        localStorage.setItem("evt-theme", next);
+      });
+    })();
+
+    /* ---------- Reveal-on-scroll (fallback for browsers without animation-timeline) ---------- */
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.6, rootMargin: "0px 0px -40% 0px" });
+      document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+      /* Story lines get their own observer with a deeper rootMargin so
+         they fade in noticeably AFTER the chapter label — line must be
+         in the top 45% of the viewport before it triggers. */
+      const ioLines = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            ioLines.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.3, rootMargin: "0px 0px -35% 0px" });
+      document.querySelectorAll(".scene .line").forEach(el => ioLines.observe(el));
+    } else {
+      document.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+      document.querySelectorAll(".scene .line").forEach(el => el.classList.add("in"));
+    }
+
+    /* ---------- Copy install command (any .install-cmd button) ---------- */
+    document.querySelectorAll(".install-cmd").forEach((btn) => {
+      const textEl = btn.querySelector(".cmd-text");
+      btn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText("npx easyvibes init");
+          btn.classList.add("copied");
+          const orig = textEl.textContent;
+          textEl.textContent = "copied to clipboard";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            textEl.textContent = orig;
+          }, 1500);
+        } catch (e) { /* ignore */ }
+      });
+    });
+
+    /* ---------- Hero terminal animation: laptop → phone joins → synced ---------- */
+    // append content into the laptop's scroll-stream (header stays static above)
+    // claude's updates flow into these streams; user prompts type into the input boxes
+    const laptopTerm = document.getElementById("laptop-stream");
+    const phoneTerm  = document.getElementById("phone-stream");
+    const laptopInput     = document.getElementById("laptop-input");
+    const laptopInputText = document.getElementById("laptop-input-text");
+    const phoneInput      = document.getElementById("phone-input");
+    const phoneInputText  = document.getElementById("phone-input-text");
+
+    const rowEl = () => { const r = document.createElement("div"); r.className = "row"; return r; };
+    const span  = (text, cls) => { const s = document.createElement("span"); if (cls) s.className = cls; s.textContent = text; return s; };
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const makeCursor = () => { const c = document.createElement("span"); c.className = "cursor"; return c; };
+
+    /* Keep the bottom of each terminal in view as content grows (real CLI feel). */
+    function scrollToBottom(termEl) {
+      if (!termEl) return;
+      termEl.scrollTop = termEl.scrollHeight;
+    }
+
+    const laptopCursor = makeCursor();
+    const phoneCursor  = makeCursor();
+
+    async function typeInto(target, text, perChar = 22, jitter = 14) {
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        target.appendChild(document.createTextNode(ch));
+        let delay = perChar + (Math.random() * jitter - jitter / 2);
+        if (".,!?".includes(ch)) delay += 240;
+        if (ch === " ") delay += Math.random() * 30;
+        await sleep(Math.max(8, delay));
+      }
+    }
+    async function typeIntoAll(targets, text, perChar = 22, jitter = 14) {
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        targets.forEach(t => t.appendChild(document.createTextNode(ch)));
+        let delay = perChar + (Math.random() * jitter - jitter / 2);
+        if (".,!?".includes(ch)) delay += 240;
+        if (ch === " ") delay += Math.random() * 30;
+        await sleep(Math.max(8, delay));
+      }
+    }
+
+    async function runLines(termEl, cursor, lines) {
+      if (reduce) {
+        for (const segs of lines) {
+          const row = rowEl();
+          for (const s of segs) row.appendChild(span(s.t, s.c));
+          termEl.appendChild(row);
+          scrollToBottom(termEl);
+        }
+        return;
+      }
+      for (const segs of lines) {
+        const row = rowEl();
+        termEl.appendChild(row);
+        scrollToBottom(termEl);
+        for (const seg of segs) {
+          if (seg.delay) await sleep(seg.delay);
+          if (seg.type === "instant") {
+            row.appendChild(span(seg.t, seg.c));
+          } else {
+            const target = span("", seg.c);
+            row.appendChild(target);
+            row.appendChild(cursor);
+            await typeInto(target, seg.t, seg.speed || 22, seg.jitter || 14);
+            cursor.remove();
+          }
+          scrollToBottom(termEl);
+        }
+        await sleep(110);
+      }
+    }
+
+    /* Type the same lines into multiple terminals simultaneously — visualizes shared session.
+       Only targets with a `cursor` get the blinking cursor during typing; targets with
+       null cursor just have the text appear in real time (passive viewer). */
+    async function runLinesSync(targets, lines) {
+      if (reduce) {
+        for (const segs of lines) {
+          targets.forEach(({ term }) => {
+            const row = rowEl();
+            for (const s of segs) row.appendChild(span(s.t, s.c));
+            term.appendChild(row);
+          });
+        }
+        return;
+      }
+      for (const segs of lines) {
+        const rows = targets.map(({ term }) => {
+          const r = rowEl();
+          term.appendChild(r);
+          scrollToBottom(term);
+          return r;
+        });
+        for (const seg of segs) {
+          if (seg.delay) await sleep(seg.delay);
+          if (seg.type === "instant") {
+            rows.forEach((r, i) => { r.appendChild(span(seg.t, seg.c)); scrollToBottom(targets[i].term); });
+          } else {
+            const tgts = rows.map((r, i) => {
+              const t = span("", seg.c);
+              r.appendChild(t);
+              if (targets[i].cursor) r.appendChild(targets[i].cursor);
+              return t;
+            });
+            await typeIntoAll(tgts, seg.t, seg.speed || 22, seg.jitter || 14);
+            targets.forEach(({ cursor, term }) => { if (cursor) cursor.remove(); scrollToBottom(term); });
+          }
+        }
+        await sleep(110);
+      }
+    }
+
+    function endWithCursor(termEl, cursor) {
+      const r = rowEl();
+      termEl.appendChild(r);
+      r.appendChild(span("> ", "prompt"));
+      r.appendChild(cursor);
+      scrollToBottom(termEl);
+    }
+
+    /* "working" line — claude-style:  * Label… (Xs · thinking)  ⟶  ● Label */
+    function buildWorkRow(termEl, label, before = null) {
+      const row = rowEl();
+      row.classList.add("row-action");
+      if (before && before.parentNode === termEl) termEl.insertBefore(row, before);
+      else termEl.appendChild(row);
+
+      const mark = span("✳", "work mark");
+
+      // text + meta share a flexible column so wrapping aligns naturally
+      const textArea = document.createElement("span");
+      textArea.className = "text-area";
+      const text = span(label, "");
+      const meta = span(" (0s · thinking)", "meta");
+      textArea.appendChild(text);
+      textArea.appendChild(meta);
+
+      row.appendChild(mark);
+      row.appendChild(textArea);
+      scrollToBottom(termEl);
+      return { row, mark, text, meta };
+    }
+
+    function resolveWorkRow({ row, mark, text, meta }, done) {
+      mark.textContent = done;
+      mark.className = "ok mark";
+      text.className = "dim";
+      meta.remove();
+    }
+
+    /* Tick the timer for `workMs` from `startTime`. If startTime is in the past,
+       the elapsed counter reflects that — useful when a step is mid-flight when
+       a new device joins. */
+    async function tickTimer(metas, workMs, startTime = Date.now()) {
+      const targetEnd = startTime + workMs;
+      while (Date.now() < targetEnd) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const txt = ` (${elapsed}s · thinking)`;
+        metas.forEach(m => m.textContent = txt);
+        await sleep(180);
+      }
+    }
+
+    async function workLine(termEl, label, workMs, done = "●", before = null) {
+      if (reduce) {
+        const row = rowEl();
+        if (before && before.parentNode === termEl) termEl.insertBefore(row, before);
+        else termEl.appendChild(row);
+        row.appendChild(span("  ", ""));
+        row.appendChild(span(done + " ", "ok"));
+        row.appendChild(span(label, "dim"));
+        return;
+      }
+      const parts = buildWorkRow(termEl, label, before);
+      await tickTimer([parts.meta], workMs);
+      resolveWorkRow(parts, done);
+      await sleep(140);
+    }
+
+    async function workLineSync(targets, label, workMs, done = "●") {
+      if (reduce) {
+        for (const t of targets) {
+          const row = rowEl();
+          if (t.before && t.before.parentNode === t.term) t.term.insertBefore(row, t.before);
+          else t.term.appendChild(row);
+          row.appendChild(span("  ", ""));
+          row.appendChild(span(done + " ", "ok"));
+          row.appendChild(span(label, "dim"));
+        }
+        return;
+      }
+      const partsList = targets.map(t => buildWorkRow(t.term, label, t.before));
+      await tickTimer(partsList.map(p => p.meta), workMs);
+      partsList.forEach(p => resolveWorkRow(p, done));
+      await sleep(140);
+    }
+
+    /* Type into a pinned input box at the bottom of a terminal.
+       The cursor lives INSIDE the .input-text span and we insert each typed
+       character before it, so the cursor always trails the last-typed char
+       (instead of getting parked at the far right of the row, which would
+       happen if the cursor were a sibling of the replay button). */
+    async function typeIntoInputs(targets, text, opts = {}) {
+      // each target: { input, inputText, cursor (or null) }
+      const speed = opts.speed || 22;
+      const jitter = opts.jitter || 14;
+      // park each cursor inside its input-text span
+      targets.forEach(t => { if (t.cursor) t.inputText.appendChild(t.cursor); });
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        targets.forEach(t => {
+          const tn = document.createTextNode(ch);
+          if (t.cursor && t.cursor.parentNode === t.inputText) {
+            t.inputText.insertBefore(tn, t.cursor);
+          } else {
+            t.inputText.appendChild(tn);
+          }
+        });
+        let delay = speed + Math.random() * jitter - jitter / 2;
+        if (".,!?".includes(ch)) delay += 240;
+        if (ch === " ") delay += Math.random() * 30;
+        await sleep(Math.max(8, delay));
+      }
+    }
+
+    /* "Send" the typed prompt — moves it from the input box to the chat stream as a
+       styled grey block (matches the real Claude Code CLI), then clears the input. */
+    function commitInputs(targets) {
+      // each target: { inputText, stream, cursor (or null) }
+      targets.forEach(t => {
+        const text = t.inputText.textContent;
+        t.inputText.textContent = "";
+        if (t.cursor && t.cursor.parentNode) t.cursor.remove();
+        if (!text) return;
+        const row = rowEl();
+        row.classList.add("user-prompt");
+        row.appendChild(span("❯", "prompt-mark"));
+        row.appendChild(span(text, "cmd"));
+        t.stream.appendChild(row);
+        scrollToBottom(t.stream);
+      });
+    }
+
+    /* Drop a block of lines instantly, no typing — for scrollback "load" effect. */
+    function appendInstantBlock(termEl, lines) {
+      for (const segs of lines) {
+        const row = rowEl();
+        for (const seg of segs) row.appendChild(span(seg.t, seg.c));
+        termEl.appendChild(row);
+      }
+      scrollToBottom(termEl);
+    }
+
+    /* A user prompt row, instantly (used for scrollback). Same structure as commitInputs. */
+    function appendPromptRow(termEl, text) {
+      const row = rowEl();
+      row.classList.add("user-prompt");
+      row.appendChild(span("❯", "prompt-mark"));
+      row.appendChild(span(text, "cmd"));
+      termEl.appendChild(row);
+      scrollToBottom(termEl);
+    }
+
+    /* A completed action row, instantly — uses the same flex layout as live work rows
+       so scrollback aligns visually with new actions appended later. */
+    function appendDoneAction(termEl, label, doneMark = "●") {
+      const row = rowEl();
+      row.classList.add("row-action");
+      termEl.appendChild(row);
+      const mark = span(doneMark, "ok mark");
+      const textArea = document.createElement("span");
+      textArea.className = "text-area";
+      textArea.appendChild(span(label, "dim"));
+      row.appendChild(mark);
+      row.appendChild(textArea);
+      scrollToBottom(termEl);
+    }
+
+    function appendBlankRow(termEl) {
+      const r = rowEl();
+      r.appendChild(document.createTextNode(" "));
+      termEl.appendChild(r);
+      scrollToBottom(termEl);
+    }
+
+    /* PHASE 1 — laptop alone: just the prompt; action items run via workLine */
+    const laptopPromptLines = [
+      [{ t: " ", c: "", type: "instant" }],
+      [
+        { t: "> ", c: "prompt", type: "instant", delay: 240 },
+        { t: "ship a /pricing page", c: "cmd", type: "type", speed: 72, jitter: 60 }
+      ],
+      [{ t: " ", c: "", type: "instant", delay: 480 }]
+    ];
+
+    /* PHASE 2a — phone types the join command */
+    const phoneJoinLines = [
+      [{ t: " ", c: "", type: "instant" }],
+      [
+        { t: "$ ", c: "prompt", type: "instant" },
+        { t: "claude-vm", c: "cmd", type: "type", speed: 50, jitter: 35 }
+      ],
+      [{ t: "  join work-on-auth", c: "cmd", type: "type", speed: 50, jitter: 35 }]
+    ];
+
+    /* PHASE 2b — scrollback. Only includes finished steps; the in-progress
+       Generating step is added live (continued from laptop). */
+    const phoneScrollback = [
+      [{ t: " ", c: "", type: "instant" }],
+      [
+        { t: "> ", c: "prompt", type: "instant" },
+        { t: "ship a /pricing page", c: "cmd", type: "instant" }
+      ],
+      [{ t: " ", c: "", type: "instant" }],
+      [
+        { t: "  ● ", c: "ok", type: "instant" },
+        { t: "Reading layout.tsx", c: "dim", type: "instant" }
+      ]
+    ];
+
+    /* PHASE 4 — user follows up after a long beat. Just the prompt; actions via workLine */
+    const followUpPrompt = [
+      [{ t: " ", c: "", type: "instant", delay: 1800 }],
+      [
+        { t: "> ", c: "prompt", type: "instant", delay: 500 },
+        { t: "nice! now add a testimonials section", c: "cmd", type: "type", speed: 78, jitter: 70 }
+      ],
+      [{ t: " ", c: "", type: "instant", delay: 380 }]
+    ];
+
+    async function run() {
+      const both = [
+        { term: laptopTerm, before: null },
+        { term: phoneTerm,  before: null }
+      ];
+
+      // 1. Cursor blinks in laptop input — ready for user.
+      laptopInputText.appendChild(laptopCursor);
+      await sleep(450);
+
+      // 2. User types prompt INTO the input box at the bottom of laptop.
+      await typeIntoInputs(
+        [{ input: laptopInput, inputText: laptopInputText, cursor: laptopCursor }],
+        "ship a /pricing page",
+        { speed: 72, jitter: 60 }
+      );
+      await sleep(380);
+
+      // 3. "Sends" — prompt moves up into the chat stream, input clears. Cursor gone.
+      commitInputs([{ inputText: laptopInputText, stream: laptopTerm, cursor: laptopCursor }]);
+      await sleep(700); // beat before claude starts working
+
+      // 4. Claude works (no cursor — agent isn't a user).
+      await workLine(laptopTerm, "Reading layout.tsx", 1400);
+
+      // 5. Generating /pricing.tsx — runs solo on laptop for 3s, then continues
+      //    across the device boundary onto the phone.
+      const genStart = Date.now();
+      const genLaptopParts = buildWorkRow(laptopTerm, "Generating /pricing.tsx");
+      await tickTimer([genLaptopParts.meta], 3000, genStart);
+
+      // 6. Phone slides in. Laptop blurs. Laptop has no cursor anymore at all.
+      document.querySelector(".devices").classList.add("staged-phone");
+      document.querySelector(".device-phone").classList.add("in");
+      // Fire scrollback while the phone is still settling — it fades up via
+      // the .phone-term .term-stream .row animation so it reads as ambient
+      // content rather than something popping in late.
+      await sleep(380);
+
+      // 7. Phone shows the existing session — rows fade in (CSS animation),
+      //    with a small stagger between prompt and the action below it.
+      appendPromptRow(phoneTerm, "ship a /pricing page");
+      await sleep(140);
+      appendDoneAction(phoneTerm, "Reading layout.tsx", "●");
+
+      // 8. Generating step appears on phone too, timer continued from laptop's start.
+      //    Laptop's Generating row freezes at its last visible state — laptop is in the
+      //    background, no live updates from this point on.
+      const genPhoneParts = buildWorkRow(phoneTerm, "Generating /pricing.tsx");
+      const elapsedNow = Math.floor((Date.now() - genStart) / 1000);
+      genPhoneParts.meta.textContent = ` (${elapsedNow}s · thinking)`;
+      await sleep(450);
+
+      // 9. Continue ticking on the PHONE only (laptop is frozen in background).
+      await tickTimer([genPhoneParts.meta], 7000, genStart);
+      resolveWorkRow(genPhoneParts, "●");
+      await sleep(380);
+
+      // 10. Continued agent work — phone only.
+      const phoneOnly = [{ term: phoneTerm, before: null }];
+      await workLineSync(phoneOnly, "Adding plans data", 1700);
+      await workLineSync(phoneOnly, "Wiring stripe checkout", 2000);
+      await workLineSync(phoneOnly, "Pushed to staging", 900, "✓");
+
+      // 11. User reads briefly, then types follow-up on phone (laptop still frozen).
+      await sleep(1200);
+      await typeIntoInputs(
+        [{ input: phoneInput, inputText: phoneInputText, cursor: phoneCursor }],
+        "nice! now add a testimonials section",
+        { speed: 78, jitter: 70 }
+      );
+      await sleep(320);
+      commitInputs([{ inputText: phoneInputText, stream: phoneTerm, cursor: phoneCursor }]);
+      await sleep(550);
+
+      // 12. Reading components/ — finishes on phone alone.
+      await workLineSync(phoneOnly, "Reading components/", 950);
+
+      // 13. Sketching layout starts on phone, runs solo for ~3s, then SWAP BACK
+      //     happens mid-step (mirrors how Generating spanned the first transition).
+      const sketchStart = Date.now();
+      const sketchPhoneParts = buildWorkRow(phoneTerm, "Sketching layout");
+      await tickTimer([sketchPhoneParts.meta], 3000, sketchStart);
+
+      // 14. SWAP BACK — laptop unblurs, phone fades out, catch-up content drops in
+      //     under the lifting blur. Smooth-scroll auto-glides to the latest line.
+      await sleep(220);
+      const dev = document.querySelector(".devices");
+      dev.classList.remove("staged-phone");
+      dev.classList.add("staged-laptop");
+
+      resolveWorkRow(genLaptopParts, "●");
+      appendDoneAction(laptopTerm, "Adding plans data", "●");
+      appendDoneAction(laptopTerm, "Wiring stripe checkout", "●");
+      appendDoneAction(laptopTerm, "Pushed to staging", "✓");
+      appendBlankRow(laptopTerm);
+      appendPromptRow(laptopTerm, "nice! now add a testimonials section");
+      appendDoneAction(laptopTerm, "Reading components/", "●");
+
+      // Sketching is still in flight — build it on the laptop with the timer
+      // continued from when it started on the phone.
+      const sketchLaptopParts = buildWorkRow(laptopTerm, "Sketching layout");
+      const sketchElapsed = Math.floor((Date.now() - sketchStart) / 1000);
+      sketchLaptopParts.meta.textContent = ` (${sketchElapsed}s · thinking)`;
+
+      // Wait for the unblur + smooth scroll to settle.
+      await sleep(950);
+
+      // 15. Continue ticking Sketching on the laptop until it resolves (~9s total).
+      await tickTimer([sketchLaptopParts.meta], 9000, sketchStart);
+      resolveWorkRow(sketchLaptopParts, "●");
+      resolveWorkRow(sketchPhoneParts, "●");
+      await sleep(380);
+
+      // 16. Remaining testimonials steps on laptop only — phone is faded out.
+      const laptopOnly1 = [{ term: laptopTerm, before: null }];
+      await workLineSync(laptopOnly1, "Wiring quotes data", 1100);
+      await workLineSync(laptopOnly1, "Preview ready", 500, "✓");
+      appendBlankRow(laptopTerm);
+      await sleep(600);
+
+      // 17. Final state — cursor parks in the empty laptop input, waiting.
+      laptopInputText.appendChild(laptopCursor);
+      await sleep(900);
+
+      // 18. Type a blue "/replay" slash-command into the input — invites the
+      //     user to click or press Enter to re-run the sequence.
+      const replaySpan = document.createElement("span");
+      replaySpan.className = "replay-cmd";
+      laptopInputText.insertBefore(replaySpan, laptopCursor);
+      const replayText = "/replay";
+      for (let i = 0; i < replayText.length; i++) {
+        replaySpan.appendChild(document.createTextNode(replayText[i]));
+        await sleep(55 + Math.random() * 45);
+      }
+      armReplay();
+    }
+
+    /* Reset all state introduced by run() so the animation can replay cleanly.
+       Clears scrollback in both terminals, removes cursors, and drops staged
+       device classes. */
+    function resetAnimation() {
+      laptopTerm.innerHTML = "";
+      phoneTerm.innerHTML = "";
+      laptopInputText.textContent = "";
+      phoneInputText.textContent = "";
+      if (laptopCursor.parentNode) laptopCursor.remove();
+      if (phoneCursor.parentNode) phoneCursor.remove();
+      laptopInput.classList.remove("done");
+      phoneInput.classList.remove("done");
+      const dev = document.querySelector(".devices");
+      dev.classList.remove("staged-phone", "staged-laptop");
+      const phoneDevice = document.querySelector(".device-phone");
+      phoneDevice.classList.remove("in");
+    }
+
+    /* Replay arming — the laptop input only becomes a click target after the
+       /replay hint has been typed. Click on the row OR Enter triggers it. */
+    let replayArmed = false;
+    function armReplay() {
+      replayArmed = true;
+      laptopInput.classList.add("done");
+    }
+    function fireReplay() {
+      if (!replayArmed) return;
+      replayArmed = false;
+      resetAnimation();
+      // Tiny delay so the device-stage transitions can register before
+      // the next run kicks off.
+      setTimeout(run, 80);
+    }
+    laptopInput.addEventListener("click", fireReplay);
+
+    /* Esc — release the lock and continue DOWN past the hero into the
+       story section. Chat animation is its own async loop; releasing the
+       lock and smooth-scrolling forward keeps it playing while letting the
+       user move on to the rest of the page. */
+    function escMinimize() {
+      unlockScroll();
+      document.querySelector(".devices").classList.remove("snapped");
+      const story = document.querySelector(".story");
+      if (story) story.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && replayArmed) {
+        e.preventDefault();
+        fireReplay();
+      } else if (e.key === "Escape" && started && !replayArmed) {
+        e.preventDefault();
+        escMinimize();
+      } else if (e.key === " " && scrollLocked) {
+        // Space lifts the scroll lock without changing anything else —
+        // chat keeps playing, terminal stays zoomed, scroll position holds.
+        e.preventDefault();
+        unlockScroll();
+      }
+    });
+
+    /* Trigger only AFTER the scroll-zoom snap has completed.
+       The CSS animation-range ends at 75vh of scroll; we wait until the user
+       has scrolled past that point (with a small buffer) so the chat starts
+       on the locked-in, full-size terminals. On browsers without scroll-driven
+       animations, or below 820px, the zoom doesn't apply, so we fall back to a
+       low scrollY threshold. Fallback timeout fires the run after 8s either way.
+
+       Once the animation begins on a zoom-capable browser, page scroll is
+       briefly locked so the user can watch the opening of the chat on the
+       snapped-in terminals before they can scroll past. Released after
+       ~5.5s — long enough to land the moment, short enough to not feel
+       trapped. Skipped on reduced-motion / mobile. */
+    let started = false;
+    const supportsZoom =
+      window.matchMedia("(min-width: 820px) and (prefers-reduced-motion: no-preference)").matches &&
+      CSS.supports("animation-timeline: scroll(root)");
+
+    /* Scroll lock — pure event prevention. We deliberately do NOT toggle
+       any CSS overflow because that disappears the scrollbar and either
+       changes page width (no gutter) or interacts oddly with scrollbar-gutter
+       on macOS (causing horizontal scroll in some configs). Instead we:
+         1. preventDefault on wheel + touchmove to block trackpad/mouse scroll
+         2. preventDefault on scroll-related keys (Space, arrows, PgUp/Dn, Home/End)
+         3. on every scroll event, snap back to the locked Y so scrollbar drag
+            and any other source can't drift away
+       Layout never changes → no width flicker, no horizontal overflow. */
+    let scrollLocked = false;
+    let _lockY = 0;
+    const _blockKeys = new Set([" ", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"]);
+    const _blockEvt = (e) => { if (scrollLocked) e.preventDefault(); };
+    const _blockKey = (e) => { if (scrollLocked && _blockKeys.has(e.key)) e.preventDefault(); };
+    const _snapBack = () => { if (scrollLocked && window.scrollY !== _lockY) window.scrollTo(0, _lockY); };
+    function lockScroll() {
+      scrollLocked = true;
+      _lockY = window.scrollY;
+      window.addEventListener("wheel", _blockEvt, { passive: false });
+      window.addEventListener("touchmove", _blockEvt, { passive: false });
+      window.addEventListener("keydown", _blockKey, { passive: false });
+      window.addEventListener("scroll", _snapBack, { passive: true });
+    }
+    function unlockScroll() {
+      scrollLocked = false;
+      window.removeEventListener("wheel", _blockEvt);
+      window.removeEventListener("touchmove", _blockEvt);
+      window.removeEventListener("keydown", _blockKey);
+      window.removeEventListener("scroll", _snapBack);
+    }
+
+    function tryStart() {
+      if (started) return;
+      const triggerY = supportsZoom ? window.innerHeight * 0.55 : 60;
+      if (window.scrollY > triggerY) {
+        started = true;
+        window.removeEventListener("scroll", tryStart);
+        if (supportsZoom) {
+          const snapY = window.innerHeight * 0.62;
+          window.scrollTo({ top: snapY, left: 0, behavior: "instant" });
+          lockScroll();
+          const devEl = document.querySelector(".devices");
+          devEl.classList.add("snapped");
+          setTimeout(() => devEl.classList.remove("snapped"), 540);
+          setTimeout(unlockScroll, 5500);
+        }
+        run();
+      }
+    }
+    window.addEventListener("scroll", tryStart, { passive: true });
+    setTimeout(() => { if (!started) { started = true; run(); } }, 8000);
+  </script>
+
+</body>
+</html>

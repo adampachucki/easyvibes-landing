@@ -1,0 +1,3 @@
+serve.py
+*.png
+.playwright-mcp/
