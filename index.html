@@ -357,7 +357,7 @@
     .term-input .input-text { color: #f4f4f3; white-space: pre-wrap; word-break: break-word; line-height: 1; flex: 1 1 auto; min-width: 0; }
     /* in centered-flex context the cursor block sits cleanly without
        the inline vertical-align trick used in scrollback rows */
-    .term-input .cursor { vertical-align: 0; margin-left: 2px; height: 0.95em; }
+    .term-input .cursor { vertical-align: middle; margin-left: 2px; height: 0.9em; position: relative; top: -1px; }
 
     /* When the animation finishes, the laptop input shows a blue "/replay"
        slash-command. Clicking the input row OR pressing Enter triggers a
@@ -1020,7 +1020,7 @@
     <div class="wrap">
       <p class="chapter-label reveal">Where the agents should live</p>
       <div class="scene">
-        <p class="line">We made agents that work alone. <span class="quiet">Then chained them to your laptop.</span></p>
+        <p class="line">The world got agents that work alone. <span class="quiet">Then chained them to your laptop.</span></p>
         <p class="line">Move them to the cloud. <span class="quiet">Persistent. Reachable from anywhere.</span></p>
         <p class="line">They keep building while you're gone. <span class="quiet">Pick up where you left off.</span></p>
         <p class="line"><strong>Cut the cord.</strong></p>
