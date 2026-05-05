@@ -406,24 +406,15 @@
        replay. The whole row becomes the click target with a soft hover. */
     .term-input.done {
       cursor: pointer;
-      transition: background 0.2s ease;
-      border-radius: 6px;
     }
     .term-input.done .input-text { cursor: pointer; }
     .input-text .replay-cmd {
       color: #6ea8ff;
       font-family: var(--mono);
-      transition: color 0.2s ease, text-shadow 0.2s ease;
-    }
-    .term-input.done:hover {
-      background: rgba(110, 168, 255, 0.06);
+      transition: color 0.2s ease;
     }
     .term-input.done:hover .replay-cmd {
       color: #9ec4ff;
-      text-shadow: 0 0 12px rgba(110, 168, 255, 0.35);
-    }
-    .term-input.done:hover .cursor {
-      background: #9ec4ff;
     }
 
     @media (max-width: 540px) {
