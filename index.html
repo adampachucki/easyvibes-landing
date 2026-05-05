@@ -292,15 +292,6 @@
       pointer-events: none;
     }
 
-    /* mobile: same overlapping layout as desktop, just smaller — and
-       without scroll-zoom / lock (those are already gated to ≥820px). */
-    @media (max-width: 640px) {
-      .devices { min-height: 320px; }
-      .device-phone { width: 160px; }
-      .laptop-term { height: 280px; }
-      .phone-term { height: 320px; }
-    }
-
     .term {
       background: #0b0b0b;
       border: 1px solid rgba(244, 244, 243, 0.08);
@@ -436,6 +427,16 @@
       scrollbar-width: none;
     }
     .phone-term .term-stream::-webkit-scrollbar { display: none; }
+
+    /* mobile: same overlapping layout as desktop, just smaller. Placed
+       AFTER the term/phone-term defaults so the cascade resolves to mobile
+       sizes (otherwise the desktop heights win by source order). */
+    @media (max-width: 640px) {
+      .devices { min-height: 320px; }
+      .device-phone { width: 200px; }
+      .laptop-term { height: 300px; }
+      .phone-term { height: 320px; }
+    }
 
     .term-body .row { white-space: pre-wrap; min-height: 1.85em; }
 
