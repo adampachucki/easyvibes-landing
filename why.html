@@ -164,13 +164,16 @@
       margin: 56px 0 18px;
     }
 
+    /* in-text links: keep body color (white in dark / black in light) and
+       use a blue underline so links read as accents, not focal points */
     .body a {
-      color: var(--link);
+      color: var(--fg);
       text-decoration: none;
-      border-bottom: 1px solid color-mix(in srgb, var(--link) 35%, transparent);
-      transition: color 0.18s ease, border-color 0.18s ease;
+      border-bottom: 1px solid var(--link);
+      transition: border-color 0.18s ease;
     }
-    .body a:hover { color: var(--link-hov); border-bottom-color: var(--link-hov); }
+    .body a strong { color: var(--fg); }
+    .body a:hover { border-bottom-color: var(--link-hov); }
 
     .body code {
       font-family: var(--mono);
