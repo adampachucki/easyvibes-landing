@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Anyone else moved Claude off their laptop? — easyvibes</title>
+  <meta name="description" content="A cloud VM, persistent terminal sessions, and the same Claude Code session on Mac and phone. The setup, the friction, and the open question." />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0b0b0b" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)" />
+  <meta name="author" content="easyvibes" />
+  <link rel="canonical" href="https://easyvibes.dev/post" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%2322c55e'/%3E%3C/svg%3E" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://easyvibes.dev/post" />
+  <meta property="og:title" content="Anyone else moved Claude off their laptop?" />
+  <meta property="og:description" content="A cloud VM, persistent terminal sessions, and the same Claude Code session on Mac and phone. The setup, the friction, and the open question." />
+  <meta property="og:site_name" content="easyvibes" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Anyone else moved Claude off their laptop?" />
+  <meta name="twitter:description" content="A cloud VM, persistent terminal sessions, and the same Claude Code session on Mac and phone." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&family=Geist+Mono:wght@300..500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* tokens — mirrors the landing page so the brand reads consistent */
+    :root[data-theme="dark"] {
+      --bg:        #0b0b0b;
+      --bg-soft:   #111111;
+      --line:      rgba(244, 244, 243, 0.07);
+      --fg:        #f4f4f3;
+      --fg-soft:   #b8b6b1;
+      --fg-mid:    #807e79;
+      --fg-dim:    #4a4844;
+      --nav-bg:    rgba(11, 11, 11, 0.7);
+      --link:      #6ea8ff;
+      --link-hov:  #9ec4ff;
+      --selection: var(--fg);
+      --selection-fg: #0b0b0b;
+    }
+    :root[data-theme="light"] {
+      --bg:        #faf9f6;
+      --bg-soft:   #f0eee8;
+      --line:      rgba(11, 11, 11, 0.08);
+      --fg:        #0b0b0b;
+      --fg-soft:   #3a3a37;
+      --fg-mid:    #7a7872;
+      --fg-dim:    #b8b6b0;
+      --nav-bg:    rgba(250, 249, 246, 0.78);
+      --link:      #2563eb;
+      --link-hov:  #1d4ed8;
+      --selection: var(--fg);
+      --selection-fg: #faf9f6;
+    }
+    :root {
+      --sans: "Geist", system-ui, -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+      --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+      --col-r:  680px;
+      --pad-x:  24px;
+    }
+    @media (min-width: 720px) { :root { --pad-x: 40px; } }
+
+    * { box-sizing: border-box; }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.6;
+      letter-spacing: -0.005em;
+      min-height: 100vh;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      overflow-x: hidden;
+    }
+    ::selection { background: var(--selection); color: var(--selection-fg); }
+
+    .wrap { max-width: var(--col-r); margin: 0 auto; padding: 0 var(--pad-x); }
+
+    /* nav */
+    .nav { padding: 22px 0; border-bottom: 1px solid var(--line); }
+    .nav-inner {
+      max-width: 920px; margin: 0 auto;
+      padding: 0 var(--pad-x);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 9px;
+      font-family: var(--mono); font-size: 13px; color: var(--fg);
+    }
+    .brand .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.55);
+    }
+    .nav-end { display: flex; align-items: center; gap: 18px; }
+    .theme-toggle {
+      width: 30px; height: 30px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--fg-mid);
+      cursor: pointer;
+      transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .theme-toggle:hover { color: var(--fg); border-color: var(--fg-mid); }
+    .theme-toggle svg { width: 14px; height: 14px; }
+    [data-theme="dark"] .theme-toggle .moon { display: none; }
+    [data-theme="light"] .theme-toggle .sun  { display: none; }
+
+    /* article */
+    article { padding: 64px 0 96px; }
+    @media (min-width: 720px) { article { padding: 96px 0 128px; } }
+
+    .meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--fg-mid);
+      margin-bottom: 28px;
+    }
+
+    .article-h1 {
+      font-family: var(--sans);
+      font-size: clamp(34px, 5.5vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -0.022em;
+      font-weight: 500;
+      margin: 0 0 14px;
+    }
+    .article-sub {
+      font-size: 18px;
+      color: var(--fg-soft);
+      margin: 0 0 56px;
+      line-height: 1.45;
+    }
+
+    .body p {
+      margin: 0 0 22px;
+      color: var(--fg-soft);
+    }
+    .body p strong { color: var(--fg); font-weight: 500; }
+
+    .body h2 {
+      font-family: var(--sans);
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.018em;
+      color: var(--fg);
+      margin: 56px 0 18px;
+    }
+
+    .body a {
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--link) 35%, transparent);
+      transition: color 0.18s ease, border-color 0.18s ease;
+    }
+    .body a:hover { color: var(--link-hov); border-bottom-color: var(--link-hov); }
+
+    .body code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-soft);
+      color: var(--fg);
+    }
+
+    .body ol {
+      padding: 0;
+      margin: 0 0 28px;
+      list-style: none;
+      counter-reset: q;
+    }
+    .body ol li {
+      counter-increment: q;
+      position: relative;
+      padding-left: 36px;
+      margin-bottom: 18px;
+      color: var(--fg-soft);
+    }
+    .body ol li::before {
+      content: counter(q);
+      position: absolute;
+      left: 0; top: 0;
+      width: 24px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--fg-mid);
+    }
+
+    .closing {
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--line);
+      color: var(--fg-mid);
+      font-size: 14px;
+    }
+    .closing a { color: var(--fg); border-bottom: 1px solid var(--fg-dim); }
+    .closing a:hover { border-bottom-color: var(--fg); }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span class="dot" aria-hidden="true"></span>
+        <span>easyvibes</span>
+      </a>
+      <div class="nav-end">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.2v2.5M12 19.3v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.2 12h2.5M19.3 12h2.5M4.2 19.8L6 18M18 6l1.8-1.8"/>
+          </svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <article>
+    <div class="wrap">
+      <p class="meta">post · 2026</p>
+      <h1 class="article-h1">Anyone else moved Claude off their laptop?</h1>
+      <p class="article-sub">A cloud VM, persistent terminal sessions, and the same Claude Code session on Mac and phone. The setup, the friction, and the open question.</p>
+
+      <div class="body">
+        <p>I'm a founder who got hooked on coding with agents, building a few things for our company and for fun.</p>
+
+        <p>When on the move, keeping the laptop open while agents run is super annoying. The sessions get interrupted anyway, connectivity changes.</p>
+
+        <p>Can't check progress from mobile. Can't give Claude the next thing to do. <code>/remote-control</code> in Claude exists but it sucks. The agent still runs on my laptop, close the lid and it stops.</p>
+
+        <p>Some people set up a Mac mini at home. That feels weird. The agents run in the cloud, the repo lives on GitHub. Why pipe all of this through a box in my flat?</p>
+
+        <p>A VM in the cloud feels more right. Never sleeps, repo lives there, no desktop dependency, reasonable security.</p>
+
+        <p>This Ona piece captured the feeling well: <a href="https://ona.com/stories/the-last-year-of-localhost" target="_blank" rel="noopener">the last year of localhost</a>.</p>
+
+        <p>I gave plain SSH a try. Half baked. Lag, drops on every network blip, reconnect dance is a disaster.</p>
+
+        <p>People often suggest tmux for the persistence side, so I tried that and ended up assembling something with more layers to make it feel smooth.</p>
+
+        <h2>Here's the setup</h2>
+
+        <p>A simple VM on Google Cloud. Always on. Repo lives in there. Claude Code, Codex, Gemini installed as CLIs.</p>
+
+        <p>The agents run inside terminal sessions on the VM, managed by <strong>zmx</strong> (small Zig project, keeps a raw PTY around). Session keeps running regardless of what's connected.</p>
+
+        <p>From the Mac, transport is <strong>Eternal Terminal</strong> on port 2022. ET is like SSH but reconnects silently. I never see the disconnect.</p>
+
+        <p>From the phone, transport is <strong>mosh</strong>. UDP based, roams gracefully (cellular to wifi and back). Client is <strong>Moshi</strong> (iOS), renders the terminal and manages tmux sessions well. Moshi needs alternate screen for scrollback, so on the phone path zmx is wrapped in tmux. The tmux is just an adapter for the phone client, not the persistence layer.</p>
+
+        <p>The point: both transports attach to the same zmx session. Same scrollback, same prompt, same agent state. Laptop, phone, both at once, all clients of the same long running shell on the VM.</p>
+
+        <p>The annoying part was scrollback: duplicated history, lack of native scroll, lagging. zmx avoids the alternate screen (tmux uses it by default, which makes scrolling agent output awkward). Combined with Claude's <code>--no-flicker</code> flag, the terminal's own scrollback ends up actually usable.</p>
+
+        <p>I wanted to avoid manually switching scroll modes and re-attaching. Moshi sees all my current sessions on the Mac, I just tap and swipe between them. Awesome.</p>
+
+        <p>A few shell functions hide the layering on the Mac with a few commands and keyboard shortcuts.</p>
+
+        <h2>The reaction</h2>
+
+        <p>Every person I've shown this to has the same wtf/wow reaction. They watch me start something on my laptop, close the lid, pull out my phone, pick up exactly where the agent was.</p>
+
+        <p>And really, this should be how it works from day one. How did we end up with the bar so low that such a basic flow gets treated as a revelation?</p>
+
+        <p>Everything is in the cloud, but somehow agents inherited the localhost assumption from the previous era.</p>
+
+        <p>I thought it would be cool to package this so people don't have to assemble the layers themselves. Put up a landing page at <a href="/">easyvibes.dev</a>, so few things I'd love thoughts on:</p>
+
+        <ol>
+          <li>How are you working with coding agents from outside your laptop? Anyone else ended up here?</li>
+          <li>What's your take on this stack? What would you do differently?</li>
+          <li>Anyone want to collab on turning this into a clean CLI (something like <code>npx easyvibes init</code>)? Open source, no commercial gatekeeping.</li>
+        </ol>
+
+        <p>Honestly I think Anthropic, OpenAI and Google should ship this themselves at some point. Until they do, here we are.</p>
+      </div>
+
+      <p class="closing">
+        Thoughts? Reach out: <a href="mailto:hi@easyvibes.dev">hi@easyvibes.dev</a> · <a href="/">back to home</a>
+      </p>
+    </div>
+  </article>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const stored = localStorage.getItem("evt-theme");
+      const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+      root.setAttribute("data-theme", stored || (prefersLight ? "light" : "dark"));
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        localStorage.setItem("evt-theme", next);
+      });
+    })();
+  </script>
+</body>
+</html>
