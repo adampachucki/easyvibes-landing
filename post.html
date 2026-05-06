@@ -202,15 +202,18 @@
       color: var(--fg-mid);
     }
 
-    .closing {
-      margin-top: 64px;
-      padding-top: 32px;
-      border-top: 1px solid var(--line);
-      color: var(--fg-mid);
-      font-size: 14px;
+    /* shared site footer (matches index.html) */
+    footer { border-top: 1px solid var(--line); padding: 32px 0 60px; margin-top: 80px; }
+    .foot {
+      max-width: 920px; margin: 0 auto;
+      padding: 0 var(--pad-x);
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: center; gap: 20px;
+      font-family: var(--mono); font-size: 12px; color: var(--fg-mid);
     }
-    .closing a { color: var(--fg); border-bottom: 1px solid var(--fg-dim); }
-    .closing a:hover { border-bottom-color: var(--fg); }
+    .foot a { color: var(--fg-mid); border: none; }
+    .foot a:hover { color: var(--fg); }
+    .foot .end { display: flex; gap: 22px; }
   </style>
 </head>
 
@@ -245,7 +248,7 @@
       <div class="body">
         <p>I'm a founder who got hooked on coding with agents, building a few things for our company and for fun.</p>
 
-        <p>When on the move, keeping the laptop open while agents run is super annoying. The sessions get interrupted anyway, connectivity changes.</p>
+        <p>Often on the move so keeping the laptop open while agents run is super annoying. The sessions get interrupted anyway, connectivity changes.</p>
 
         <p>Can't check progress from mobile. Can't give Claude the next thing to do. <code>/remote-control</code> in Claude exists but it sucks. The agent still runs on my laptop, close the lid and it stops.</p>
 
@@ -257,17 +260,17 @@
 
         <p>I gave plain SSH a try. Half baked. Lag, drops on every network blip, reconnect dance is a disaster.</p>
 
-        <p>People often suggest tmux for the persistence side, so I tried that and ended up assembling something with more layers to make it feel smooth.</p>
+        <p>People often suggest <a href="https://github.com/tmux/tmux" target="_blank" rel="noopener">tmux</a> for the persistence side, so I tried that and ended up assembling something with more layers to make it feel smooth.</p>
 
         <h2>Here's the setup</h2>
 
         <p>A simple VM on Google Cloud. Always on. Repo lives in there. Claude Code, Codex, Gemini installed as CLIs.</p>
 
-        <p>The agents run inside terminal sessions on the VM, managed by <strong>zmx</strong> (small Zig project, keeps a raw PTY around). Session keeps running regardless of what's connected.</p>
+        <p>The agents run inside terminal sessions on the VM, managed by <a href="https://github.com/neurosnap/zmx" target="_blank" rel="noopener"><strong>zmx</strong></a> (small Zig project, keeps a raw PTY around). Session keeps running regardless of what's connected.</p>
 
-        <p>From the Mac, transport is <strong>Eternal Terminal</strong> on port 2022. ET is like SSH but reconnects silently. I never see the disconnect.</p>
+        <p>From the Mac, transport is <a href="https://eternalterminal.dev/" target="_blank" rel="noopener"><strong>Eternal Terminal</strong></a> on port 2022. ET is like SSH but reconnects silently. I never see the disconnect.</p>
 
-        <p>From the phone, transport is <strong>mosh</strong>. UDP based, roams gracefully (cellular to wifi and back). Client is <strong>Moshi</strong> (iOS), renders the terminal and manages tmux sessions well. Moshi needs alternate screen for scrollback, so on the phone path zmx is wrapped in tmux. The tmux is just an adapter for the phone client, not the persistence layer.</p>
+        <p>From the phone, transport is <a href="https://mosh.org/" target="_blank" rel="noopener"><strong>mosh</strong></a>. UDP based, roams gracefully (cellular to wifi and back). Client is <a href="https://apps.apple.com/app/moshi-mosh-client/id6736500053" target="_blank" rel="noopener"><strong>Moshi</strong></a> (iOS), renders the terminal and manages tmux sessions well. Moshi needs alternate screen for scrollback, so on the phone path zmx is wrapped in <a href="https://github.com/tmux/tmux" target="_blank" rel="noopener">tmux</a>. The tmux is just an adapter for the phone client, not the persistence layer.</p>
 
         <p>The point: both transports attach to the same zmx session. Same scrollback, same prompt, same agent state. Laptop, phone, both at once, all clients of the same long running shell on the VM.</p>
 
@@ -285,7 +288,9 @@
 
         <p>Everything is in the cloud, but somehow agents inherited the localhost assumption from the previous era.</p>
 
-        <p>I thought it would be cool to package this so people don't have to assemble the layers themselves. Put up a landing page at <a href="/">easyvibes.dev</a>, so few things I'd love thoughts on:</p>
+        <p>I thought it would be cool to package this so people don't have to assemble the layers themselves.</p>
+
+        <p>So few things I'd love thoughts on:</p>
 
         <ol>
           <li>How are you working with coding agents from outside your laptop? Anyone else ended up here?</li>
@@ -295,12 +300,18 @@
 
         <p>Honestly I think Anthropic, OpenAI and Google should ship this themselves at some point. Until they do, here we are.</p>
       </div>
-
-      <p class="closing">
-        Thoughts? Reach out: <a href="mailto:hi@easyvibes.dev">hi@easyvibes.dev</a> · <a href="/">back to home</a>
-      </p>
     </div>
   </article>
+
+  <footer>
+    <div class="foot">
+      <span><a href="/">easyvibes.dev</a> · agent coding as it should be</span>
+      <div class="end">
+        <a href="https://github.com/adampachucki/easyvibes" target="_blank" rel="noopener">github</a>
+        <a href="mailto:a@pac.is">a@pac.is</a>
+      </div>
+    </div>
+  </footer>
 
   <script>
     (function () {
